@@ -158,14 +158,14 @@ func (uc *BalanceUseCase) UpdateReport(ctx context.Context, year, month int) (st
 }
 
 // todo move to controller
-func decodeCursor(str string) (int, error) {
-  data, err := base64.URLEncoding.DecodeString(str)
-  if err != nil {
-    return 0, entity.ErrWrongCursor
-  }
-  num, err := strconv.Atoi(string(data))
-  if err != nil || num < 1 {
-    return 0, entity.ErrWrongCursor
-  }
-  return num, nil
-}
+// func decodeCursor(str string) (int, error) {
+//   data, err := base64.URLEncoding.DecodeString(str)
+//   if err != nil {
+//     return 0, entity.ErrWrongCursor
+//   }
+//   num, err := strconv.Atoi(string(data))
+//   if err != nil || num < 1 {
+//     return 0, entity.ErrWrongCursor
+//   }
+//   return num, nil
+// }
