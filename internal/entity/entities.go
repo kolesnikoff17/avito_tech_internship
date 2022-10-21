@@ -23,8 +23,10 @@ type Order struct {
 // History -.
 type History struct {
   Orders  []Order `json:"orders"`
+  UserID  int     `json:"-" db:"user_id"`
   Limit   int     `json:"-" db:"limit"`
   OrderBy string  `json:"-" db:"order_by"`
+  Asc     bool    `json:"-" db:"asc"`
   Cursor  string  `json:"cursor"`
 }
 
