@@ -10,4 +10,5 @@ var (
   ErrOrderMismatch    = errors.New("order data doesnt match order data from db")
   ErrCantChangeStatus = errors.New("cant update status of committed/canceled order")
   ErrEmptyReport      = errors.New("no any operations in this month")
+  ErrWrongCursor      = errors.New("wrong cursor format")
 )

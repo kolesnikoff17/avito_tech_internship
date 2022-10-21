@@ -5,6 +5,7 @@ import (
   reportmock "balance_api/internal/mocks/report"
   repomock "balance_api/internal/mocks/repository"
   "context"
+  "encoding/base64"
   "github.com/stretchr/testify/assert"
   "testing"
   "time"
@@ -115,7 +116,7 @@ func TestChangeOrderStatus(t *testing.T) {
     Return(entity.Order{}, entity.ErrOrderNoExists)
   r.On("GetOrderByID", ctx, 4).
     Return(entity.Order{ID: 4, ServiceID: 4, UserID: 4, Sum: "200", StatusID: 1}, nil)
-  r.On("GetOrderByID", ctx, 4).
+  r.On("GetOrderByID", ctx, 5).
     Return(entity.Order{ID: 5, ServiceID: 5, UserID: 5, Sum: "200", StatusID: 2}, nil)
 
   type TestCase struct {
@@ -159,7 +160,9 @@ func TestIncrease(t *testing.T) {
   uc := New(r, reportmock.NewReportFile(t))
 
   r.On("GetByID", ctx, 1).Return(entity.Balance{}, entity.ErrNoID)
+  r.On("CreateUser", ctx, entity.Balance{ID: 1, Amount: "200"}).Return(nil)
   r.On("GetByID", ctx, 2).Return(entity.Balance{ID: 2, Amount: "1"}, nil)
+  r.On("Increase", ctx, entity.Balance{ID: 2, Amount: "200"}).Return(nil)
 
   type TestCase struct {
     name        string
@@ -211,7 +214,7 @@ func TestGetHistory(t *testing.T) {
     expectedVal: entity.History{Orders: []entity.Order{
       {ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: time.Unix(1, 0)},
       {ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: time.Unix(10, 0)},
-    }, UserID: 1, Limit: 10, OrderBy: "date", Asc: true, Cursor: ""},
+    }, UserID: 1, Limit: 10, OrderBy: "date", Asc: true, Cursor: base64.URLEncoding.EncodeToString([]byte("2"))},
     expectedErr: nil,
   }, {
     name:        "no such user",
@@ -228,7 +231,7 @@ func TestGetHistory(t *testing.T) {
   }
 }
 
-func TestGetReport(t *testing.T) {
+func TestUpdateReport(t *testing.T) {
   ctx := context.Background()
   r := repomock.NewBalanceRepo(t)
   f := reportmock.NewReportFile(t)
@@ -237,9 +240,9 @@ func TestGetReport(t *testing.T) {
   r.On("GetReport", ctx, 2022, 10).
     Return(entity.Report{Sums: []entity.SumByService{{Sum: "1", Name: "a"}}}, nil)
   f.On("Create", ctx, "2022-10", entity.Report{Sums: []entity.SumByService{{Sum: "1", Name: "a"}}}).
-    Return("2022-06.csv", nil)
+    Return("2022-10.csv", nil)
 
-  r.On("GetReport", ctx, 1980, 1).Return(entity.Report{Sums: nil})
+  r.On("GetReport", ctx, 1980, 1).Return(entity.Report{Sums: nil}, entity.ErrEmptyReport)
 
   type TestCase struct {
     name        string
@@ -251,7 +254,7 @@ func TestGetReport(t *testing.T) {
   cases := []TestCase{{
     name:        "valid",
     date:        []int{2022, 10},
-    expectedVal: "2000-10.csv",
+    expectedVal: "2022-10.csv",
     expectedErr: nil,
   }, {
     name:        "empty report",
