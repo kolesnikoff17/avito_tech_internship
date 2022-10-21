@@ -3,7 +3,7 @@
 package repomock
 
 import (
-  entity "balance_api/internal/entity"
+	entity "balance_api/internal/entity"
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"
@@ -14,8 +14,8 @@ type BalanceRepo struct {
 	mock.Mock
 }
 
-// ChangeOrderStatus provides a mock function with given fields: ctx, order
-func (_m *BalanceRepo) ChangeOrderStatus(ctx context.Context, order entity.Order) error {
+// CommitOrder provides a mock function with given fields: ctx, order
+func (_m *BalanceRepo) CommitOrder(ctx context.Context, order entity.Order) error {
 	ret := _m.Called(ctx, order)
 
 	var r0 error
@@ -35,6 +35,20 @@ func (_m *BalanceRepo) CreateOrder(ctx context.Context, order entity.Order) erro
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, entity.Order) error); ok {
 		r0 = rf(ctx, order)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreateUser provides a mock function with given fields: ctx, balance
+func (_m *BalanceRepo) CreateUser(ctx context.Context, balance entity.Balance) error {
+	ret := _m.Called(ctx, balance)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Balance) error); ok {
+		r0 = rf(ctx, balance)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -84,6 +98,27 @@ func (_m *BalanceRepo) GetHistory(ctx context.Context, history entity.History) (
 	return r0, r1
 }
 
+// GetOrderByID provides a mock function with given fields: ctx, id
+func (_m *BalanceRepo) GetOrderByID(ctx context.Context, id int) (entity.Order, error) {
+	ret := _m.Called(ctx, id)
+
+	var r0 entity.Order
+	if rf, ok := ret.Get(0).(func(context.Context, int) entity.Order); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(entity.Order)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetReport provides a mock function with given fields: ctx, year, month
 func (_m *BalanceRepo) GetReport(ctx context.Context, year int, month int) (entity.Report, error) {
 	ret := _m.Called(ctx, year, month)
@@ -119,8 +154,8 @@ func (_m *BalanceRepo) Increase(ctx context.Context, balance entity.Balance) err
 	return r0
 }
 
-// VerifyOrder provides a mock function with given fields: ctx, order
-func (_m *BalanceRepo) VerifyOrder(ctx context.Context, order entity.Order) error {
+// RollbackOrder provides a mock function with given fields: ctx, order
+func (_m *BalanceRepo) RollbackOrder(ctx context.Context, order entity.Order) error {
 	ret := _m.Called(ctx, order)
 
 	var r0 error

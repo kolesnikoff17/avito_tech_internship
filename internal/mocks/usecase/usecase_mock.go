@@ -14,8 +14,8 @@ type Balance struct {
 	mock.Mock
 }
 
-// CommitOrder provides a mock function with given fields: ctx, order
-func (_m *Balance) CommitOrder(ctx context.Context, order entity.Order) error {
+// ChangeOrderStatus provides a mock function with given fields: ctx, order
+func (_m *Balance) ChangeOrderStatus(ctx context.Context, order entity.Order) error {
 	ret := _m.Called(ctx, order)
 
 	var r0 error
@@ -91,20 +91,6 @@ func (_m *Balance) Increase(ctx context.Context, balance entity.Balance) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, entity.Balance) error); ok {
 		r0 = rf(ctx, balance)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// RollbackOrder provides a mock function with given fields: ctx, order
-func (_m *Balance) RollbackOrder(ctx context.Context, order entity.Order) error {
-	ret := _m.Called(ctx, order)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Order) error); ok {
-		r0 = rf(ctx, order)
 	} else {
 		r0 = ret.Error(0)
 	}
