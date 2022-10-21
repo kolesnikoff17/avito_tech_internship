@@ -1,7 +1,7 @@
 package usecase
 
 import (
-  "avito_tech_internship/internal/entity"
+  "balance_api/internal/entity"
   "context"
 )
 

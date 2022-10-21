@@ -3,7 +3,7 @@
 package repomock
 
 import (
-	entity "avito_tech_internship/internal/entity"
+  entity "balance_api/internal/entity"
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"

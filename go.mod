@@ -1,4 +1,4 @@
-module avito_tech_internship
+module balance_api
 
 go 1.18
 
