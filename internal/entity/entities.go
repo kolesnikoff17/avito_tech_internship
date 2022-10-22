@@ -17,17 +17,17 @@ type Order struct {
 	StatusID    int       `json:"-" db:"status_id"`
 	Status      string    `json:"status" db:"status_name"`
 	Sum         string    `json:"sum" db:"order_sum"`
-	Time        time.Time `json:"time" db:"modified"`
+	Time        time.Time `json:"time" db:"created"`
 }
 
 // History -.
 type History struct {
 	Orders  []Order `json:"orders"`
-	UserID  int     `json:"-" db:"user_id"`
-	Limit   int     `json:"-" db:"limit"`
-	OrderBy string  `json:"-" db:"order_by"`
-	Desc    bool    `json:"-" db:"desc"`
-	Page    int     `json:"-" db:"page"`
+	UserID  int     `json:"-"`
+	Limit   int     `json:"-"`
+	OrderBy string  `json:"-"`
+	Desc    bool    `json:"-"`
+	Page    int     `json:"-"`
 }
 
 // SumByService -.

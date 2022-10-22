@@ -15,7 +15,7 @@ CREATE TABLE services (
 );
 
 CREATE TABLE orders (
-    id INTEGER CHECK (id > 0) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     service_id INTEGER,
     user_id INTEGER,
     order_sum DECIMAL(18,2) CHECK ( order_sum >= 0 ),
