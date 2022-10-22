@@ -37,7 +37,7 @@ func (uc *BalanceUseCase) GetByID(ctx context.Context, id int) (entity.Balance, 
 
 // CreateOrder puts new order in repo, returns entity.ErrNoID if there is no such user,
 // entity.ErrOrderExists if order exists, entity.ErrNotEnoughMoney if user doesn't have
-// enough money for this order
+// enough money for this order, entity.ErrNoService if service id is wrong
 func (uc *BalanceUseCase) CreateOrder(ctx context.Context, order entity.Order) error {
 	balance, err := uc.repo.GetByID(ctx, order.UserID)
 	switch {
@@ -46,16 +46,23 @@ func (uc *BalanceUseCase) CreateOrder(ctx context.Context, order entity.Order) e
 	case err != nil:
 		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
 	}
-	got, err := decimal.NewFromString(balance.Amount)
+	err = isLess(balance.Amount, order.Sum)
 	if err != nil {
+		return err
+	}
+	err = uc.repo.CheckServiceID(ctx, order.ServiceID)
+	switch {
+	case errors.Is(err, entity.ErrNoService):
+		return err
+	case err != nil:
 		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
 	}
-	dec, err := decimal.NewFromString(order.Sum)
-	if err != nil {
+	_, err = uc.repo.GetOrderByID(ctx, order.ID)
+	switch {
+	case err == nil:
+		return entity.ErrOrderExists
+	case !errors.Is(err, entity.ErrOrderNoExists):
 		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
-	}
-	if got.LessThan(dec) {
-		return entity.ErrNotEnoughMoney
 	}
 	err = uc.repo.CreateOrder(ctx, order)
 	switch {
@@ -156,6 +163,21 @@ func (uc *BalanceUseCase) UpdateReport(ctx context.Context, year, month int) (st
 		return "", fmt.Errorf("BalanceUseCase - UpdateReport: %w", err)
 	}
 	return name, nil
+}
+
+func isLess(gotStr, decStr string) error {
+	got, err := decimal.NewFromString(gotStr)
+	if err != nil {
+		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
+	}
+	dec, err := decimal.NewFromString(decStr)
+	if err != nil {
+		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
+	}
+	if got.LessThan(dec) {
+		return entity.ErrNotEnoughMoney
+	}
+	return nil
 }
 
 // todo move to controller

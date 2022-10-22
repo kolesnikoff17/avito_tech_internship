@@ -14,6 +14,20 @@ type BalanceRepo struct {
 	mock.Mock
 }
 
+// CheckServiceID provides a mock function with given fields: ctx, id
+func (_m *BalanceRepo) CheckServiceID(ctx context.Context, id int) error {
+	ret := _m.Called(ctx, id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CommitOrder provides a mock function with given fields: ctx, order
 func (_m *BalanceRepo) CommitOrder(ctx context.Context, order entity.Order) error {
 	ret := _m.Called(ctx, order)
