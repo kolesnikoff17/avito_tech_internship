@@ -5,7 +5,6 @@ import (
   reportmock "balance_api/internal/mocks/report"
   repomock "balance_api/internal/mocks/repository"
   "context"
-  "encoding/base64"
   "github.com/stretchr/testify/assert"
   "testing"
   "time"
@@ -193,13 +192,17 @@ func TestGetHistory(t *testing.T) {
   uc := New(r, reportmock.NewReportFile(t))
 
   r.On("GetByID", ctx, 1).Return(entity.Balance{ID: 1, Amount: "200"}, nil)
-  r.On("GetHistory", ctx, entity.History{UserID: 1, Limit: 10, OrderBy: "date", Asc: true, Cursor: ""}).
+  r.On("GetHistory", ctx, entity.History{UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1}).
     Return(entity.History{Orders: []entity.Order{
       {ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: time.Unix(1, 0)},
       {ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: time.Unix(10, 0)},
-    }, UserID: 1, Limit: 10, OrderBy: "date", Asc: true, Cursor: ""}, nil)
+    }, UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1}, nil)
 
   r.On("GetByID", ctx, 2).Return(entity.Balance{}, entity.ErrNoID)
+
+  r.On("GetByID", ctx, 3).Return(entity.Balance{ID: 3, Amount: "200"}, nil)
+  r.On("GetHistory", ctx, entity.History{UserID: 3, Limit: 2, OrderBy: "sum", Desc: false, Page: 10}).
+    Return(entity.History{}, entity.ErrEmptyPage)
 
   type TestCase struct {
     name        string
@@ -210,17 +213,22 @@ func TestGetHistory(t *testing.T) {
 
   cases := []TestCase{{
     name: "valid",
-    val:  entity.History{UserID: 1, Limit: 10, OrderBy: "date", Asc: true, Cursor: ""},
+    val:  entity.History{UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1},
     expectedVal: entity.History{Orders: []entity.Order{
       {ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: time.Unix(1, 0)},
       {ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: time.Unix(10, 0)},
-    }, UserID: 1, Limit: 10, OrderBy: "date", Asc: true, Cursor: base64.URLEncoding.EncodeToString([]byte("2"))},
+    }, UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1},
     expectedErr: nil,
   }, {
     name:        "no such user",
-    val:         entity.History{UserID: 2, Limit: 2, OrderBy: "sum", Asc: false, Cursor: ""},
+    val:         entity.History{UserID: 2, Limit: 2, OrderBy: "sum", Desc: false, Page: 1},
     expectedVal: entity.History{},
     expectedErr: entity.ErrNoID,
+  }, {
+    name:        "empty page",
+    val:         entity.History{UserID: 3, Limit: 2, OrderBy: "sum", Desc: false, Page: 10},
+    expectedVal: entity.History{},
+    expectedErr: entity.ErrEmptyPage,
   },
   }
 
