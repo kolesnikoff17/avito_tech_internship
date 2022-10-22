@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -16,14 +15,14 @@ type BalanceReport struct {
 }
 
 // New creates new dir and constructs BalanceReport
-func New(d string) *BalanceReport {
+func New(d string) (*BalanceReport, error) {
 	err := os.Mkdir(strings.Trim(d, "/"), 0750)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return &BalanceReport{
 		reportDir: d,
-	}
+	}, nil
 }
 
 // Create writes entity.Report to a csv file
