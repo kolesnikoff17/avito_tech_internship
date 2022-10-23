@@ -255,10 +255,10 @@ func TestUpdateReport(t *testing.T) {
 	f := reportmock.NewReportFile(t)
 	uc := New(r, f)
 
-	r.On("GetReport", ctx, 2022, 10).
+	r.On("GetReport", ctx, 2022, 9).
 		Return(entity.Report{Sums: []entity.SumByService{{Sum: "1", Name: "a"}}}, nil)
-	f.On("Create", ctx, "2022-10", entity.Report{Sums: []entity.SumByService{{Sum: "1", Name: "a"}}}).
-		Return("2022-10.csv", nil)
+	f.On("Create", ctx, "2022-09", entity.Report{Sums: []entity.SumByService{{Sum: "1", Name: "a"}}}).
+		Return("2022-09.csv", nil)
 
 	r.On("GetReport", ctx, 1980, 1).Return(entity.Report{Sums: nil}, entity.ErrEmptyReport)
 
@@ -271,8 +271,8 @@ func TestUpdateReport(t *testing.T) {
 
 	cases := []TestCase{{
 		name:        "valid",
-		date:        []int{2022, 10},
-		expectedVal: "2022-10.csv",
+		date:        []int{2022, 9},
+		expectedVal: "2022-09.csv",
 		expectedErr: nil,
 	}, {
 		name:        "empty report",
@@ -287,4 +287,14 @@ func TestUpdateReport(t *testing.T) {
 		assert.Equal(t, tc.expectedVal, name)
 		assert.Equal(t, tc.expectedErr, err)
 	}
+}
+
+func TestGetDir(t *testing.T) {
+	r := repomock.NewBalanceRepo(t)
+	f := reportmock.NewReportFile(t)
+	uc := New(r, f)
+
+	f.On("GetDir").Return("reports/")
+
+	assert.Equal(t, "reports/", uc.GetReportDir())
 }
