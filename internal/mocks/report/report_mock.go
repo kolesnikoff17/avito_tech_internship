@@ -35,6 +35,20 @@ func (_m *ReportFile) Create(ctx context.Context, name string, report entity.Rep
 	return r0, r1
 }
 
+// GetDir provides a mock function with given fields:
+func (_m *ReportFile) GetDir() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewReportFile interface {
 	mock.TestingT
 	Cleanup(func())

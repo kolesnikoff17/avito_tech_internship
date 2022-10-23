@@ -162,6 +162,10 @@ func (uc *BalanceUseCase) UpdateReport(ctx context.Context, year, month int) (st
 	return name, nil
 }
 
+func (uc *BalanceUseCase) GetReportDir() string {
+	return uc.report.GetDir()
+}
+
 func isLess(gotStr, decStr string) error {
 	got, _ := decimal.NewFromString(gotStr)
 	dec, _ := decimal.NewFromString(decStr)

@@ -13,6 +13,7 @@ type Balance interface {
 	Increase(ctx context.Context, balance entity.Balance) error
 	GetHistory(ctx context.Context, history entity.History) (entity.History, error)
 	UpdateReport(ctx context.Context, year, month int) (string, error)
+	GetReportDir() string
 }
 
 // BalanceRepo is an interface for repository layer
@@ -32,4 +33,5 @@ type BalanceRepo interface {
 // ReportFile interface serves for saving reports as files
 type ReportFile interface {
 	Create(ctx context.Context, name string, report entity.Report) (string, error)
+	GetDir() string
 }

@@ -25,6 +25,11 @@ func New(d string) (*BalanceReport, error) {
 	}, nil
 }
 
+// GetDir is a getter for reportDir field of BalanceReport
+func (r *BalanceReport) GetDir() string {
+	return r.reportDir
+}
+
 // Create writes entity.Report to a csv file
 func (r *BalanceReport) Create(ctx context.Context, name string, report entity.Report) (string, error) {
 	name = name + ".csv"

@@ -84,6 +84,20 @@ func (_m *Balance) GetHistory(ctx context.Context, history entity.History) (enti
 	return r0, r1
 }
 
+// GetReportDir provides a mock function with given fields:
+func (_m *Balance) GetReportDir() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // Increase provides a mock function with given fields: ctx, balance
 func (_m *Balance) Increase(ctx context.Context, balance entity.Balance) error {
 	ret := _m.Called(ctx, balance)
