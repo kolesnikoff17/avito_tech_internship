@@ -1,0 +1,29 @@
+version: '3'
+services:
+  pgdb:
+    image: "postgres:14"
+    container_name: "pgdb"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=balance_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pwd123
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "54320:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./schema:/docker-entrypoint-initdb.d
+  app:
+    image: balance_api
+    container_name: balance_api
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - pgdb
+    env_file:
+      config/config.env
+    links:
+      - pgdb
