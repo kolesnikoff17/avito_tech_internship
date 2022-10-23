@@ -38,7 +38,7 @@ func (r *BalanceRepo) CreateOrder(ctx context.Context, order entity.Order) error
 	}
 	defer tx.Rollback()
 	_, err = tx.NamedExecContext(ctx,
-		`INSERT INTO orders (id, service_id, user_id, order_sum, status_id)
+		`INSERT INTO orders (order_id, service_id, user_id, order_sum, status_id)
 						VALUES (:order_id, :service_id, :user_id, :order_sum, 1)`, order)
 	if err != nil {
 		return fmt.Errorf("BalanceRepository - CreateOrder: %w", err)
@@ -56,7 +56,7 @@ func (r *BalanceRepo) CreateOrder(ctx context.Context, order entity.Order) error
 func (r *BalanceRepo) GetOrderByID(ctx context.Context, id int) (entity.Order, error) {
 	var res entity.Order
 	err := r.Pool.GetContext(ctx, &res,
-		`SELECT id AS order_id, service_id, user_id, status_id, order_sum FROM orders WHERE id = $1`, id)
+		`SELECT order_id, service_id, user_id, status_id, order_sum FROM orders WHERE order_id = $1`, id)
 	if err != nil {
 		return entity.Order{}, entity.ErrOrderNoExists
 	}
@@ -66,7 +66,7 @@ func (r *BalanceRepo) GetOrderByID(ctx context.Context, id int) (entity.Order, e
 // CheckServiceID returns nil if service exists in db, entity.ErrNoService otherwise
 func (r *BalanceRepo) CheckServiceID(ctx context.Context, id int) error {
 	var service struct {
-		id int `db:"service_id"`
+		ID int `db:"service_id"`
 	}
 	err := r.Pool.GetContext(ctx, &service,
 		`SELECT service_id FROM services WHERE service_id = $1`, id)
@@ -84,7 +84,7 @@ func (r *BalanceRepo) CommitOrder(ctx context.Context, order entity.Order) error
 	}
 	defer tx.Rollback()
 	_, err = tx.NamedExecContext(ctx,
-		`UPDATE orders SET status_id = :status_id, modified = now() WHERE id = :order_id`, order)
+		`UPDATE orders SET status_id = :status_id, modified = now() WHERE order_id = :order_id`, order)
 	if err != nil {
 		return fmt.Errorf("BalanceRepository - CommitOrder: %w", err)
 	}
@@ -104,7 +104,7 @@ func (r *BalanceRepo) RollbackOrder(ctx context.Context, order entity.Order) err
 	}
 	defer tx.Rollback()
 	_, err = tx.NamedExecContext(ctx,
-		`UPDATE orders SET status_id = :status_id, modified = now() WHERE id = :order_id`, order)
+		`UPDATE orders SET status_id = :status_id, modified = now() WHERE order_id = :order_id`, order)
 	if err != nil {
 		return fmt.Errorf("BalanceRepository - RollbackOrder: %w", err)
 	}
@@ -146,7 +146,7 @@ func (r *BalanceRepo) Increase(ctx context.Context, balance entity.Balance) erro
 	}
 	defer tx.Rollback()
 	_, err = tx.NamedExecContext(ctx,
-		`UPDATE users SET ampunt = amount + :amount WHERE user_id = :user_id`, balance)
+		`UPDATE users SET amount = amount + :amount WHERE user_id = :user_id`, balance)
 	if err != nil {
 		return fmt.Errorf("BalanceRepository - Increase: %w", err)
 	}
@@ -176,17 +176,17 @@ func (r *BalanceRepo) GetHistory(ctx context.Context, history entity.History) (e
 
 func queryConstructor(history entity.History) string {
 	var str strings.Builder
-	str.WriteString(`SELECT serv.service_name, or.order_sum, st.status_name, or.created 
-											FROM orders AS or
-											JOIN services AS serv ON or.service_id = serv.service_id
-											JOIN status AS st ON or.status_id = st.status_id
-											WHERE or.user_id = $1
-											ODER BY `)
+	str.WriteString(`SELECT serv.service_name, o.order_sum, st.status_name, o.created 
+											FROM orders AS o
+											JOIN services AS serv ON o.service_id = serv.service_id
+											JOIN status AS st ON o.status_id = st.status_id
+											WHERE o.user_id = $1
+											ORDER BY `)
 	switch history.OrderBy {
 	case "date":
-		str.WriteString("or.created ")
+		str.WriteString("o.created ")
 	case "sum":
-		str.WriteString("or.order_sum ")
+		str.WriteString("o.order_sum ")
 	}
 	if history.Desc {
 		str.WriteString("DESC\n")
@@ -195,7 +195,11 @@ func queryConstructor(history entity.History) string {
 	}
 	offset := history.Limit * (history.Page - 1)
 	str.WriteString(`LIMIT `)
-	str.WriteString(strconv.Itoa(history.Limit))
+	if history.Limit != 0 {
+		str.WriteString(strconv.Itoa(history.Limit))
+	} else {
+		str.WriteString("ALL")
+	}
 	str.WriteString(` OFFSET `)
 	str.WriteString(strconv.Itoa(offset))
 	return str.String()

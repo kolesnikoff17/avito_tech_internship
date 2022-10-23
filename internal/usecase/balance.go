@@ -82,7 +82,7 @@ func (uc *BalanceUseCase) ChangeOrderStatus(ctx context.Context, order entity.Or
 	case err != nil:
 		return fmt.Errorf("BalanceUseCase - ChangeOrderStatus: %w", err)
 	}
-	if order.ServiceID != dbOrder.ServiceID || order.UserID != dbOrder.UserID || order.Sum != dbOrder.Sum {
+	if order.ServiceID != dbOrder.ServiceID || order.UserID != dbOrder.UserID || !isEqual(order.Sum, dbOrder.Sum) {
 		return entity.ErrOrderMismatch
 	}
 	if dbOrder.StatusID != 1 {
@@ -174,4 +174,10 @@ func isLess(gotStr, decStr string) error {
 		return entity.ErrNotEnoughMoney
 	}
 	return nil
+}
+
+func isEqual(orderStr, dbStr string) bool {
+	order, _ := decimal.NewFromString(orderStr)
+	db, _ := decimal.NewFromString(dbStr)
+	return order.Equal(db)
 }

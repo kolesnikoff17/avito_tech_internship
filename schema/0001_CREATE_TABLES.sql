@@ -1,7 +1,7 @@
 CREATE TABLE users (
-    user_id INTEGER CHECK (id > 0) PRIMARY KEY,
-    amount DECIMAL(18,2) CHECK ( amount >= 0 ),
-    reserved DECIMAL(18,2) CHECK ( reserved >= 0 )
+    user_id INTEGER CHECK (user_id > 0) PRIMARY KEY,
+    amount DECIMAL(18,2) CHECK ( amount >= 0 ) NOT NULL,
+    reserved DECIMAL(18,2) CHECK ( reserved >= 0 ) NOT NULL DEFAULT 0.00
 );
 
 CREATE TABLE status (
@@ -16,6 +16,7 @@ CREATE TABLE services (
 
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
+    order_id INTEGER UNIQUE,
     service_id INTEGER,
     user_id INTEGER,
     order_sum DECIMAL(18,2) CHECK ( order_sum >= 0 ),
