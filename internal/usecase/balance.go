@@ -162,6 +162,7 @@ func (uc *BalanceUseCase) UpdateReport(ctx context.Context, year, month int) (st
 	return name, nil
 }
 
+// GetReportDir is getter of report dir
 func (uc *BalanceUseCase) GetReportDir() string {
 	return uc.report.GetDir()
 }
