@@ -65,10 +65,7 @@ func (uc *BalanceUseCase) CreateOrder(ctx context.Context, order entity.Order) e
 		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
 	}
 	err = uc.repo.CreateOrder(ctx, order)
-	switch {
-	case errors.Is(err, entity.ErrOrderExists):
-		return err
-	case err != nil:
+	if err != nil {
 		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
 	}
 	return nil
@@ -166,29 +163,10 @@ func (uc *BalanceUseCase) UpdateReport(ctx context.Context, year, month int) (st
 }
 
 func isLess(gotStr, decStr string) error {
-	got, err := decimal.NewFromString(gotStr)
-	if err != nil {
-		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
-	}
-	dec, err := decimal.NewFromString(decStr)
-	if err != nil {
-		return fmt.Errorf("BalanceUseCase - CreateOrder: %w", err)
-	}
+	got, _ := decimal.NewFromString(gotStr)
+	dec, _ := decimal.NewFromString(decStr)
 	if got.LessThan(dec) {
 		return entity.ErrNotEnoughMoney
 	}
 	return nil
 }
-
-// todo move to controller
-// func decodeCursor(str string) (int, error) {
-//   data, err := base64.URLEncoding.DecodeString(str)
-//   if err != nil {
-//     return 0, entity.ErrWrongCursor
-//   }
-//   num, err := strconv.Atoi(string(data))
-//   if err != nil || num < 1 {
-//     return 0, entity.ErrWrongCursor
-//   }
-//   return num, nil
-// }
