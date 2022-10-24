@@ -27,7 +27,7 @@ func newBalanceRoutes(handler *gin.RouterGroup, b usecase.Balance, l logger.Inte
 
 	handler.GET("/user", mw.ValidateQuery[userGetRequest](r.l), r.getByID)
 	handler.POST("/user", mw.ValidateJSONBody[userPostRequest](r.l), r.increaseAmount)
-	handler.POST("/orderHandle", mw.ValidateJSONBody[orderPostRequest](r.l), r.orderHandle)
+	handler.POST("/order", mw.ValidateJSONBody[orderPostRequest](r.l), r.orderHandle)
 	handler.GET("/history", mw.ValidateQuery[historyGetRequest](r.l), r.getHistory)
 	handler.GET("/report", mw.ValidateQuery[reportGetRequest](r.l), r.createReport)
 	handler.GET("/reports/:name", r.getReport)
@@ -131,8 +131,8 @@ func (r *balanceRouters) orderHandle(c *gin.Context) {
 		err = r.b.ChangeOrderStatus(c.Request.Context(),
 			entity.Order{ID: b.ID, ServiceID: b.ServiceID, UserID: b.UserID, Sum: b.Sum, StatusID: 3})
 	default:
-		r.l.Infof("err \"wrong orderHandle action\" with request params: %v", b)
-		errorResponse(c, http.StatusBadRequest, "Invalid orderHandle action")
+		r.l.Infof("err \"wrong order action\" with request params: %v", b)
+		errorResponse(c, http.StatusBadRequest, "Invalid order action")
 		return
 	}
 	errMsg := ""
@@ -148,7 +148,7 @@ func (r *balanceRouters) orderHandle(c *gin.Context) {
 	case errors.Is(err, entity.ErrOrderNoExists):
 		errMsg = "Order not exists"
 	case errors.Is(err, entity.ErrOrderMismatch):
-		errMsg = "Wrong orderHandle data"
+		errMsg = "Wrong order data"
 	case errors.Is(err, entity.ErrCantChangeStatus):
 		errMsg = "Order already approved/canceled"
 	case err != nil:
@@ -222,7 +222,7 @@ func setHistoryParams(h historyGetRequest) (historyGetRequest, string) {
 	case "date":
 	case "sum":
 	default:
-		return historyGetRequest{}, "Wrong orderHandle by param"
+		return historyGetRequest{}, "Wrong order by param"
 	}
 	return h, ""
 }
