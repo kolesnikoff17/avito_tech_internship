@@ -23,7 +23,7 @@ func newBalanceRoutes(handler *gin.RouterGroup, b usecase.Balance, l logger.Inte
 	}
 
 	handler.GET("/user", mw.ValidateQuery[userGetRequest](r.l), r.getByID)
-	handler.POST("/user", mw.ValidateJSONBody[userPostRequest](r.l), r.increase)
+	handler.POST("/user", mw.ValidateJSONBody[userPostRequest](r.l), r.increaseAmount)
 	handler.POST("/order", mw.ValidateJSONBody[orderPostRequest](r.l), r.order)
 	handler.GET("/history", mw.ValidateQuery[historyGetRequest](r.l), r.getHistory)
 	handler.GET("/report", mw.ValidateQuery[reportGetRequest](r.l), r.createReport)
@@ -44,11 +44,11 @@ func (r *balanceRouters) getByID(c *gin.Context) {
 	switch {
 	case errors.Is(err, entity.ErrNoID):
 		r.l.Infof("err \"%s\" with request params: %v", err, q)
-		ErrorResponse(c, http.StatusBadRequest, "No such id")
+		errorResponse(c, http.StatusBadRequest, "No such id")
 		return
 	case err != nil:
 		r.l.Error(err)
-		ErrorResponse(c, http.StatusInternalServerError, "Database error")
+		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
 	c.JSON(http.StatusOK, balance)
@@ -59,18 +59,18 @@ type userPostRequest struct {
 	Amount string `json:"amount" binding:"required"`
 }
 
-func (r *balanceRouters) increase(c *gin.Context) {
+func (r *balanceRouters) increaseAmount(c *gin.Context) {
 	b := mw.GetJSONBody[userPostRequest](c)
 	num, err := decimal.NewFromString(b.Amount)
 	if err != nil || !num.IsPositive() {
 		r.l.Infof("err \"%s\" with request params: %v", err, b)
-		ErrorResponse(c, http.StatusBadRequest, "Invalid money format")
+		errorResponse(c, http.StatusBadRequest, "Invalid money format")
 		return
 	}
 	err = r.b.Increase(c.Request.Context(), entity.Balance{ID: b.ID, Amount: b.Amount})
 	if err != nil {
 		r.l.Error(err)
-		ErrorResponse(c, http.StatusInternalServerError, "Database error")
+		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
 	c.JSON(http.StatusOK, struct{}{})
@@ -89,7 +89,7 @@ func (r *balanceRouters) order(c *gin.Context) {
 	num, err := decimal.NewFromString(b.Sum)
 	if err != nil || !num.IsPositive() {
 		r.l.Infof("err \"%s\" with request params: %v", err, b)
-		ErrorResponse(c, http.StatusBadRequest, "Invalid money format")
+		errorResponse(c, http.StatusBadRequest, "Invalid money format")
 		return
 	}
 	switch b.Action {
@@ -104,7 +104,7 @@ func (r *balanceRouters) order(c *gin.Context) {
 			entity.Order{ID: b.ID, ServiceID: b.ServiceID, UserID: b.UserID, Sum: b.Sum, StatusID: 3})
 	default:
 		r.l.Infof("err \"wrong order action\" with request params: %v", b)
-		ErrorResponse(c, http.StatusBadRequest, "Invalid order action")
+		errorResponse(c, http.StatusBadRequest, "Invalid order action")
 		return
 	}
 	errMsg := ""
@@ -125,12 +125,12 @@ func (r *balanceRouters) order(c *gin.Context) {
 		errMsg = "Order already approved/canceled"
 	case err != nil:
 		r.l.Error(err)
-		ErrorResponse(c, http.StatusInternalServerError, "Database error")
+		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
 	if err != nil {
 		r.l.Infof("err \"%s\" with request params: %v", err, b)
-		ErrorResponse(c, http.StatusBadRequest, errMsg)
+		errorResponse(c, http.StatusBadRequest, errMsg)
 		return
 	}
 	c.JSON(http.StatusOK, struct{}{})
@@ -149,7 +149,7 @@ func (r *balanceRouters) getHistory(c *gin.Context) {
 	q, msg := setHistoryParams(q)
 	if msg != "" {
 		r.l.Infof("err \"%s\" with request params: %v", msg, q)
-		ErrorResponse(c, http.StatusBadRequest, msg)
+		errorResponse(c, http.StatusBadRequest, msg)
 		return
 	}
 	h, err := r.b.GetHistory(c.Request.Context(),
@@ -157,15 +157,15 @@ func (r *balanceRouters) getHistory(c *gin.Context) {
 	switch {
 	case errors.Is(err, entity.ErrNoID):
 		r.l.Infof("err \"%s\" with request params: %v", err, q)
-		ErrorResponse(c, http.StatusBadRequest, "No such id")
+		errorResponse(c, http.StatusBadRequest, "No such id")
 		return
 	case errors.Is(err, entity.ErrEmptyPage):
 		r.l.Infof("err \"%s\" with request params: %v", err, q)
-		ErrorResponse(c, http.StatusBadRequest, "The page is empty")
+		errorResponse(c, http.StatusBadRequest, "The page is empty")
 		return
 	case err != nil:
 		r.l.Error(err)
-		ErrorResponse(c, http.StatusInternalServerError, "Database error")
+		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
 	c.JSON(http.StatusOK, h)
@@ -197,11 +197,11 @@ func (r *balanceRouters) createReport(c *gin.Context) {
 	switch {
 	case errors.Is(err, entity.ErrEmptyReport):
 		r.l.Infof("err \"%s\" with request params: %v", err, q)
-		ErrorResponse(c, http.StatusBadRequest, "Report is empty")
+		errorResponse(c, http.StatusBadRequest, "Report is empty")
 		return
 	case err != nil:
 		r.l.Error(err)
-		ErrorResponse(c, http.StatusInternalServerError, "Database error")
+		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
 	c.JSON(http.StatusOK, struct {

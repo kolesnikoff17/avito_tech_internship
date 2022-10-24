@@ -8,7 +8,6 @@ type response struct {
 	Msg string `json:"error"`
 }
 
-// ErrorResponse aborts current request with err
-func ErrorResponse(c *gin.Context, code int, msg string) {
+func errorResponse(c *gin.Context, code int, msg string) {
 	c.AbortWithStatusJSON(code, response{Msg: msg})
 }

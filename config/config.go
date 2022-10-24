@@ -30,6 +30,7 @@ type (
 		Name    string
 		MaxConn int
 	}
+	// Logger -.
 	Logger struct {
 		Level string
 	}
