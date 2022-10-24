@@ -79,7 +79,7 @@ func (r *balanceRouters) increase(c *gin.Context) {
 type orderPostRequest struct {
 	Action    string `json:"action" binding:"required"`
 	ID        int    `json:"order_id" binding:"required,gte=1"`
-	ServiceID int    `json:"service_id" binding:"required,gte=2"`
+	ServiceID int    `json:"service_id" binding:"required,gte=1"`
 	UserID    int    `json:"user_id" binding:"required,gte=1"`
 	Sum       string `json:"sum" binding:"required"`
 }

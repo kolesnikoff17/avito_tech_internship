@@ -130,8 +130,8 @@ func (r *BalanceRepo) CreateUser(ctx context.Context, balance entity.Balance) er
 		return fmt.Errorf("BalanceRepository - CreateUser: %w", err)
 	}
 	_, err = tx.NamedExecContext(ctx,
-		`INSERT INTO orders (service_id, user_id, order_sum, status_id) 
-						VALUES (1, :user_id, :amount, 2)`, balance)
+		`INSERT INTO replenishments (user_id, amount) 
+						VALUES (:user_id, :amount)`, balance)
 	if err != nil {
 		return fmt.Errorf("BalanceRepository - CreateUser: %w", err)
 	}
@@ -151,8 +151,8 @@ func (r *BalanceRepo) Increase(ctx context.Context, balance entity.Balance) erro
 		return fmt.Errorf("BalanceRepository - Increase: %w", err)
 	}
 	_, err = tx.NamedExecContext(ctx,
-		`INSERT INTO orders (service_id, user_id, order_sum, status_id) 
-						VALUES (1, :user_id, :amount, 2)`, balance)
+		`INSERT INTO replenishments (user_id, amount) 
+						VALUES (:user_id, :amount)`, balance)
 	if err != nil {
 		return fmt.Errorf("BalanceRepository - Increase: %w", err)
 	}
@@ -181,12 +181,16 @@ func queryConstructor(history entity.History) string {
 											JOIN services AS serv ON o.service_id = serv.service_id
 											JOIN status AS st ON o.status_id = st.status_id
 											WHERE o.user_id = $1
+											UNION
+											SELECT 'Replenishment' AS service_name, amount AS order_sum, 'Approved' AS status_name, created
+											FROM replenishments
+											WHERE user_id = $1
 											ORDER BY `)
 	switch history.OrderBy {
 	case "date":
-		str.WriteString("o.created ")
+		str.WriteString("created ")
 	case "sum":
-		str.WriteString("o.order_sum ")
+		str.WriteString("order_sum ")
 	}
 	if history.Desc {
 		str.WriteString("DESC\n")
@@ -211,7 +215,7 @@ func (r *BalanceRepo) GetReport(ctx context.Context, year, month int) (entity.Re
 	err := r.Pool.SelectContext(ctx, &Sums,
 		`SELECT sum(o.order_sum) AS sums, s.service_name FROM orders as o
 						JOIN services AS s on s.service_id = o.service_id
-						WHERE o.service_id <> 1 AND o.status_id = 2
+						WHERE o.status_id = 2
 						AND EXTRACT(YEAR FROM o.modified) = $1 AND EXTRACT(MONTH FROM o.modified) = $2
 						GROUP BY s.service_name`, year, month)
 	if err != nil {

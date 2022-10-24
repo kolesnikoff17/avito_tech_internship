@@ -14,6 +14,14 @@ CREATE TABLE services (
     service_name VARCHAR(55)
 );
 
+CREATE TABLE replenishments (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    amount DECIMAL(18,2) CHECK ( amount >= 0 ),
+    created TIMESTAMPTZ NOT NULL DEFAULT now(),
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     order_id INTEGER UNIQUE,
@@ -21,15 +29,15 @@ CREATE TABLE orders (
     user_id INTEGER,
     order_sum DECIMAL(18,2) CHECK ( order_sum >= 0 ),
     status_id INTEGER,
-    created TIMESTAMP NOT NULL DEFAULT now(),
-    modified TIMESTAMP NOT NULL DEFAULT now(),
+    created TIMESTAMPTZ NOT NULL DEFAULT now(),
+    modified TIMESTAMPTZ NOT NULL DEFAULT now(),
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (status_id) REFERENCES status (status_id),
     FOREIGN KEY (service_id) REFERENCES services (service_id)
 );
 
 INSERT INTO services (service_id, service_name) VALUES
-    (1, 'Replenishment'),
+    (1, 'Rent'),
     (2, 'Good bought'),
     (3, 'Advertisement bought'),
     (4, 'Service commission'),
