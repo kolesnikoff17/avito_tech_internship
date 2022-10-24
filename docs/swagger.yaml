@@ -1,0 +1,279 @@
+basePath: /v1
+definitions:
+  entity.Balance:
+    properties:
+      amount:
+        type: string
+      id:
+        type: integer
+    type: object
+  entity.History:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/entity.Order'
+        type: array
+    type: object
+  entity.MyTime:
+    properties:
+      time:
+        type: string
+    type: object
+  entity.Order:
+    properties:
+      service:
+        type: string
+      status:
+        type: string
+      sum:
+        type: string
+      time:
+        $ref: '#/definitions/entity.MyTime'
+    type: object
+  v1.emptyJSONResponse:
+    type: object
+  v1.orderPostRequest:
+    properties:
+      action:
+        type: string
+      order_id:
+        minimum: 1
+        type: integer
+      service_id:
+        minimum: 1
+        type: integer
+      sum:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+    required:
+    - action
+    - order_id
+    - service_id
+    - sum
+    - user_id
+    type: object
+  v1.reportGetResponse:
+    properties:
+      link:
+        type: string
+    type: object
+  v1.response:
+    properties:
+      error:
+        type: string
+    type: object
+  v1.userPostRequest:
+    properties:
+      amount:
+        type: string
+      id:
+        minimum: 1
+        type: integer
+    required:
+    - amount
+    - id
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: vladkolesnikofff@gmail.com
+    name: Developer
+  description: Service for interactions with user's money accounts
+  license:
+    name: MIT
+    url: https://github.com/kolesnikoff17/avito_tech_internship/blob/main/LICENSE
+  title: Balance API
+  version: "1.0"
+paths:
+  /history:
+    get:
+      description: Returns user's transaction history
+      parameters:
+      - description: user id
+        in: query
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: pagination limit
+        in: query
+        minimum: 0
+        name: limit
+        type: integer
+      - description: pagination page
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: descending sort
+        in: query
+        name: desc
+        type: boolean
+      - description: sort by
+        in: query
+        name: order_by
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.History'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getHistory
+      tags:
+      - history
+  /order:
+    post:
+      consumes:
+      - application/json
+      description: Creates, commits or rollbacks order
+      parameters:
+      - description: order info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.orderPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.emptyJSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: orderHandle
+      tags:
+      - order
+  /report:
+    get:
+      description: Returns link to report file
+      parameters:
+      - description: year
+        in: query
+        minimum: 1900
+        name: year
+        required: true
+        type: integer
+      - description: month
+        in: query
+        maximum: 12
+        minimum: 1
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.reportGetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: createReport
+      tags:
+      - report
+  /reports/{name}:
+    get:
+      description: Returns report file
+      parameters:
+      - description: file name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: getReport
+      tags:
+      - report
+  /user:
+    get:
+      description: Returns user's balance
+      parameters:
+      - description: user id
+        in: query
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Balance'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: getByID
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Makes new replenishment
+      parameters:
+      - description: user id and amount
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.userPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.emptyJSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: increaseAmount
+      tags:
+      - user
+swagger: "2.0"

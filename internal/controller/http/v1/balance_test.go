@@ -145,7 +145,7 @@ func TestOrder(t *testing.T) {
 	l, _ := logger.New("debug")
 	NewRouter(h, uc, l)
 
-	req := "/v1/order"
+	req := "/v1/orderHandle"
 
 	uc.On("CreateOrder", ctx, entity.Order{ID: 1, ServiceID: 2, UserID: 1, Sum: "200"}).
 		Return(nil)
@@ -214,7 +214,7 @@ func TestOrder(t *testing.T) {
 		name:    "wrong action",
 		body:    orderPostRequest{Action: "aboba", ID: 1, ServiceID: 2, UserID: 1, Sum: "200"},
 		expCode: http.StatusBadRequest,
-		resp:    response{Msg: "Invalid order action"},
+		resp:    response{Msg: "Invalid orderHandle action"},
 	}, {
 		name:    "no service",
 		body:    orderPostRequest{Action: "create", ID: 1, ServiceID: 10, UserID: 1, Sum: "200"},
@@ -231,12 +231,12 @@ func TestOrder(t *testing.T) {
 		expCode: http.StatusBadRequest,
 		resp:    response{Msg: "Not enough money"},
 	}, {
-		name:    "order exists",
+		name:    "orderHandle exists",
 		body:    orderPostRequest{Action: "create", ID: 10, ServiceID: 2, UserID: 1, Sum: "200"},
 		expCode: http.StatusBadRequest,
 		resp:    response{Msg: "Order already exists"},
 	}, {
-		name:    "order not exists",
+		name:    "orderHandle not exists",
 		body:    orderPostRequest{Action: "approve", ID: 2, ServiceID: 2, UserID: 1, Sum: "200"},
 		expCode: http.StatusBadRequest,
 		resp:    response{Msg: "Order not exists"},
@@ -244,7 +244,7 @@ func TestOrder(t *testing.T) {
 		name:    "mismatch",
 		body:    orderPostRequest{Action: "approve", ID: 3, ServiceID: 2, UserID: 1, Sum: "200"},
 		expCode: http.StatusBadRequest,
-		resp:    response{Msg: "Wrong order data"},
+		resp:    response{Msg: "Wrong orderHandle data"},
 	}, {
 		name:    "cant change status",
 		body:    orderPostRequest{Action: "approve", ID: 4, ServiceID: 2, UserID: 1, Sum: "200"},
@@ -357,10 +357,10 @@ func TestHistory(t *testing.T) {
 		expCode: http.StatusBadRequest,
 		resp:    response{Msg: "Limit and page should be both zero or non zero"},
 	}, {
-		name:    "wrong order by param",
+		name:    "wrong orderHandle by param",
 		query:   "?id=1&order_by=1",
 		expCode: http.StatusBadRequest,
-		resp:    response{Msg: "Wrong order by param"},
+		resp:    response{Msg: "Wrong orderHandle by param"},
 	}, {
 		name:    "no id",
 		query:   "?id=2",

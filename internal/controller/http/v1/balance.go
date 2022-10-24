@@ -16,6 +16,9 @@ type balanceRouters struct {
 	l logger.Interface
 }
 
+type emptyJSONResponse struct {
+}
+
 func newBalanceRoutes(handler *gin.RouterGroup, b usecase.Balance, l logger.Interface) {
 	r := &balanceRouters{
 		b: b,
@@ -24,20 +27,25 @@ func newBalanceRoutes(handler *gin.RouterGroup, b usecase.Balance, l logger.Inte
 
 	handler.GET("/user", mw.ValidateQuery[userGetRequest](r.l), r.getByID)
 	handler.POST("/user", mw.ValidateJSONBody[userPostRequest](r.l), r.increaseAmount)
-	handler.POST("/order", mw.ValidateJSONBody[orderPostRequest](r.l), r.order)
+	handler.POST("/orderHandle", mw.ValidateJSONBody[orderPostRequest](r.l), r.orderHandle)
 	handler.GET("/history", mw.ValidateQuery[historyGetRequest](r.l), r.getHistory)
 	handler.GET("/report", mw.ValidateQuery[reportGetRequest](r.l), r.createReport)
-	handler.GET("/reports/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		dir := r.b.GetReportDir()
-		c.FileAttachment(dir+name, name)
-	})
+	handler.GET("/reports/:name", r.getReport)
 }
 
 type userGetRequest struct {
 	ID int `form:"id" binding:"required,gte=1"`
 }
 
+// @Summary     getByID
+// @Description Returns user's balance
+// @Tags  	    user
+// @Produce     json
+// @Param       id query int true "user id" minimum(1)
+// @Success     200 {object} entity.Balance
+// @Failure     400 {object} response
+// @Failure     500 {object} response
+// @Router      /user [get]
 func (r *balanceRouters) getByID(c *gin.Context) {
 	q := mw.GetQueryParams[userGetRequest](c)
 	balance, err := r.b.GetByID(c.Request.Context(), q.ID)
@@ -59,6 +67,16 @@ type userPostRequest struct {
 	Amount string `json:"amount" binding:"required"`
 }
 
+// @Summary     increaseAmount
+// @Description Makes new replenishment
+// @Tags  	    user
+// @Accept      json
+// @Produce     json
+// @Param       request body userPostRequest true "user id and amount"
+// @Success     200 {object} emptyJSONResponse
+// @Failure     400 {object} response
+// @Failure     500 {object} response
+// @Router      /user [post]
 func (r *balanceRouters) increaseAmount(c *gin.Context) {
 	b := mw.GetJSONBody[userPostRequest](c)
 	num, err := decimal.NewFromString(b.Amount)
@@ -84,7 +102,17 @@ type orderPostRequest struct {
 	Sum       string `json:"sum" binding:"required"`
 }
 
-func (r *balanceRouters) order(c *gin.Context) {
+// @Summary     orderHandle
+// @Description Creates, commits or rollbacks order
+// @Tags  	    order
+// @Accept      json
+// @Produce     json
+// @Param       request body orderPostRequest true "order info"
+// @Success     200 {object} emptyJSONResponse
+// @Failure     400 {object} response
+// @Failure     500 {object} response
+// @Router      /order [post]
+func (r *balanceRouters) orderHandle(c *gin.Context) {
 	b := mw.GetJSONBody[orderPostRequest](c)
 	num, err := decimal.NewFromString(b.Sum)
 	if err != nil || !num.IsPositive() {
@@ -103,8 +131,8 @@ func (r *balanceRouters) order(c *gin.Context) {
 		err = r.b.ChangeOrderStatus(c.Request.Context(),
 			entity.Order{ID: b.ID, ServiceID: b.ServiceID, UserID: b.UserID, Sum: b.Sum, StatusID: 3})
 	default:
-		r.l.Infof("err \"wrong order action\" with request params: %v", b)
-		errorResponse(c, http.StatusBadRequest, "Invalid order action")
+		r.l.Infof("err \"wrong orderHandle action\" with request params: %v", b)
+		errorResponse(c, http.StatusBadRequest, "Invalid orderHandle action")
 		return
 	}
 	errMsg := ""
@@ -120,7 +148,7 @@ func (r *balanceRouters) order(c *gin.Context) {
 	case errors.Is(err, entity.ErrOrderNoExists):
 		errMsg = "Order not exists"
 	case errors.Is(err, entity.ErrOrderMismatch):
-		errMsg = "Wrong order data"
+		errMsg = "Wrong orderHandle data"
 	case errors.Is(err, entity.ErrCantChangeStatus):
 		errMsg = "Order already approved/canceled"
 	case err != nil:
@@ -144,6 +172,19 @@ type historyGetRequest struct {
 	OrderBy string `form:"order_by" binding:"omitempty"`
 }
 
+// @Summary     getHistory
+// @Description Returns user's transaction history
+// @Tags  	    history
+// @Produce     json
+// @Param       id query int true "user id" minimum(1)
+// @Param       limit query int false "pagination limit" minimum(0)
+// @Param       page query int false "pagination page" minimum(1)
+// @Param       desc query bool false "descending sort"
+// @Param       order_by query string false "sort by"
+// @Success     200 {object} entity.History
+// @Failure     400 {object} response
+// @Failure     500 {object} response
+// @Router      /history [get]
 func (r *balanceRouters) getHistory(c *gin.Context) {
 	q := mw.GetQueryParams[historyGetRequest](c)
 	q, msg := setHistoryParams(q)
@@ -181,7 +222,7 @@ func setHistoryParams(h historyGetRequest) (historyGetRequest, string) {
 	case "date":
 	case "sum":
 	default:
-		return historyGetRequest{}, "Wrong order by param"
+		return historyGetRequest{}, "Wrong orderHandle by param"
 	}
 	return h, ""
 }
@@ -191,6 +232,20 @@ type reportGetRequest struct {
 	Month int `form:"month" binding:"required,gte=1,lte=12"`
 }
 
+type reportGetResponse struct {
+	Link string `json:"link"`
+}
+
+// @Summary     createReport
+// @Description Returns link to report file
+// @Tags  	    report
+// @Produce     json
+// @Param       year query int true "year" minimum(1900)
+// @Param       month query int true "month" minimum(1) maximum(12)
+// @Success     200 {object} reportGetResponse
+// @Failure     400 {object} response
+// @Failure     500 {object} response
+// @Router      /report [get]
 func (r *balanceRouters) createReport(c *gin.Context) {
 	q := mw.GetQueryParams[reportGetRequest](c)
 	name, err := r.b.UpdateReport(c.Request.Context(), q.Year, q.Month)
@@ -204,7 +259,18 @@ func (r *balanceRouters) createReport(c *gin.Context) {
 		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
-	c.JSON(http.StatusOK, struct {
-		Link string `json:"link"`
-	}{Link: c.Request.Host + c.Request.URL.Path + "s/" + name})
+	c.JSON(http.StatusOK, reportGetResponse{Link: c.Request.Host + c.Request.URL.Path + "s/" + name})
+}
+
+// @Summary     getReport
+// @Description Returns report file
+// @Tags  	    report
+// @Produce     plain
+// @Param       name path string true "file name"
+// @Success     200 {array} string
+// @Router      /reports/{name} [get]
+func (r *balanceRouters) getReport(c *gin.Context) {
+	name := c.Param("name")
+	dir := r.b.GetReportDir()
+	c.FileAttachment(dir+name, name)
 }
