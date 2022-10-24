@@ -37,6 +37,7 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "example": 1,
                         "description": "user id",
                         "name": "id",
                         "in": "query",
@@ -45,6 +46,7 @@ const docTemplate = `{
                     {
                         "minimum": 0,
                         "type": "integer",
+                        "example": 10,
                         "description": "pagination limit",
                         "name": "limit",
                         "in": "query"
@@ -52,18 +54,21 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "example": 1,
                         "description": "pagination page",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
+                        "example": true,
                         "description": "descending sort",
                         "name": "desc",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "example": "date",
                         "description": "sort by",
                         "name": "order_by",
                         "in": "query"
@@ -151,6 +156,7 @@ const docTemplate = `{
                     {
                         "minimum": 1900,
                         "type": "integer",
+                        "example": 2022,
                         "description": "year",
                         "name": "year",
                         "in": "query",
@@ -160,6 +166,7 @@ const docTemplate = `{
                         "maximum": 12,
                         "minimum": 1,
                         "type": "integer",
+                        "example": 10,
                         "description": "month",
                         "name": "month",
                         "in": "query",
@@ -234,6 +241,7 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "example": 1,
                         "description": "user id",
                         "name": "id",
                         "in": "query",
@@ -369,22 +377,32 @@ const docTemplate = `{
             ],
             "properties": {
                 "action": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "create",
+                        "approve",
+                        "cancel"
+                    ],
+                    "example": "create"
                 },
                 "order_id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "service_id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "sum": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "200"
                 },
                 "user_id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 }
             }
         },
@@ -412,11 +430,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "200"
                 },
                 "id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 }
             }
         }

@@ -30,6 +30,7 @@
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "example": 1,
                         "description": "user id",
                         "name": "id",
                         "in": "query",
@@ -38,6 +39,7 @@
                     {
                         "minimum": 0,
                         "type": "integer",
+                        "example": 10,
                         "description": "pagination limit",
                         "name": "limit",
                         "in": "query"
@@ -45,18 +47,21 @@
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "example": 1,
                         "description": "pagination page",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
+                        "example": true,
                         "description": "descending sort",
                         "name": "desc",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "example": "date",
                         "description": "sort by",
                         "name": "order_by",
                         "in": "query"
@@ -144,6 +149,7 @@
                     {
                         "minimum": 1900,
                         "type": "integer",
+                        "example": 2022,
                         "description": "year",
                         "name": "year",
                         "in": "query",
@@ -153,6 +159,7 @@
                         "maximum": 12,
                         "minimum": 1,
                         "type": "integer",
+                        "example": 10,
                         "description": "month",
                         "name": "month",
                         "in": "query",
@@ -227,6 +234,7 @@
                     {
                         "minimum": 1,
                         "type": "integer",
+                        "example": 1,
                         "description": "user id",
                         "name": "id",
                         "in": "query",
@@ -362,22 +370,32 @@
             ],
             "properties": {
                 "action": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "create",
+                        "approve",
+                        "cancel"
+                    ],
+                    "example": "create"
                 },
                 "order_id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "service_id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 },
                 "sum": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "200"
                 },
                 "user_id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 }
             }
         },
@@ -405,11 +423,13 @@
             ],
             "properties": {
                 "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "200"
                 },
                 "id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 1
                 }
             }
         }

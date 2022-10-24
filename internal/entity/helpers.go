@@ -19,9 +19,9 @@ func (t *MyTime) MarshalJSON() ([]byte, error) {
 
 // Scan -.
 func (t *MyTime) Scan(src interface{}) error {
-	switch src.(type) {
+	switch src := src.(type) {
 	case time.Time:
-		t.Time = src.(time.Time)
+		t.Time = src
 	default:
 		return errors.New("scan error: unknown type")
 	}

@@ -41,7 +41,7 @@ type userGetRequest struct {
 // @Description Returns user's balance
 // @Tags  	    user
 // @Produce     json
-// @Param       id query int true "user id" minimum(1)
+// @Param       id query int true "user id" minimum(1) example(1)
 // @Success     200 {object} entity.Balance
 // @Failure     400 {object} response
 // @Failure     500 {object} response
@@ -63,8 +63,8 @@ func (r *balanceRouters) getByID(c *gin.Context) {
 }
 
 type userPostRequest struct {
-	ID     int    `json:"id" binding:"required,gte=1"`
-	Amount string `json:"amount" binding:"required"`
+	ID     int    `json:"id" binding:"required,gte=1" example:"1"`
+	Amount string `json:"amount" binding:"required" example:"200"`
 }
 
 // @Summary     increaseAmount
@@ -91,15 +91,15 @@ func (r *balanceRouters) increaseAmount(c *gin.Context) {
 		errorResponse(c, http.StatusInternalServerError, "Database error")
 		return
 	}
-	c.JSON(http.StatusOK, struct{}{})
+	c.JSON(http.StatusOK, emptyJSONResponse{})
 }
 
 type orderPostRequest struct {
-	Action    string `json:"action" binding:"required"`
-	ID        int    `json:"order_id" binding:"required,gte=1"`
-	ServiceID int    `json:"service_id" binding:"required,gte=1"`
-	UserID    int    `json:"user_id" binding:"required,gte=1"`
-	Sum       string `json:"sum" binding:"required"`
+	Action    string `json:"action" binding:"required" enums:"create,approve,cancel" example:"create"`
+	ID        int    `json:"order_id" binding:"required,gte=1" example:"1"`
+	ServiceID int    `json:"service_id" binding:"required,gte=1" example:"1"`
+	UserID    int    `json:"user_id" binding:"required,gte=1" example:"1"`
+	Sum       string `json:"sum" binding:"required" example:"200"`
 }
 
 // @Summary     orderHandle
@@ -161,7 +161,7 @@ func (r *balanceRouters) orderHandle(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, errMsg)
 		return
 	}
-	c.JSON(http.StatusOK, struct{}{})
+	c.JSON(http.StatusOK, emptyJSONResponse{})
 }
 
 type historyGetRequest struct {
@@ -176,11 +176,11 @@ type historyGetRequest struct {
 // @Description Returns user's transaction history
 // @Tags  	    history
 // @Produce     json
-// @Param       id query int true "user id" minimum(1)
-// @Param       limit query int false "pagination limit" minimum(0)
-// @Param       page query int false "pagination page" minimum(1)
-// @Param       desc query bool false "descending sort"
-// @Param       order_by query string false "sort by"
+// @Param       id query int true "user id" minimum(1) example(1)
+// @Param       limit query int false "pagination limit" minimum(0) example(10)
+// @Param       page query int false "pagination page" minimum(1) example(1)
+// @Param       desc query bool false "descending sort" example(true)
+// @Param       order_by query string false "sort by" example(date)
 // @Success     200 {object} entity.History
 // @Failure     400 {object} response
 // @Failure     500 {object} response
@@ -240,8 +240,8 @@ type reportGetResponse struct {
 // @Description Returns link to report file
 // @Tags  	    report
 // @Produce     json
-// @Param       year query int true "year" minimum(1900)
-// @Param       month query int true "month" minimum(1) maximum(12)
+// @Param       year query int true "year" minimum(1900) example(2022)
+// @Param       month query int true "month" minimum(1) maximum(12) example(10)
 // @Success     200 {object} reportGetResponse
 // @Failure     400 {object} response
 // @Failure     500 {object} response
