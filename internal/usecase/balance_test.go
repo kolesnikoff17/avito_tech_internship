@@ -204,8 +204,8 @@ func TestGetHistory(t *testing.T) {
 	r.On("GetByID", ctx, 1).Return(entity.Balance{ID: 1, Amount: "200"}, nil)
 	r.On("GetHistory", ctx, entity.History{UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1}).
 		Return(entity.History{Orders: []entity.Order{
-			{ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: time.Unix(1, 0)},
-			{ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: time.Unix(10, 0)},
+			{ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: entity.MyTime{Time: time.Unix(10, 0)}},
+			{ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: entity.MyTime{Time: time.Unix(10, 0)}},
 		}, UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1}, nil)
 
 	r.On("GetByID", ctx, 2).Return(entity.Balance{}, entity.ErrNoID)
@@ -225,8 +225,8 @@ func TestGetHistory(t *testing.T) {
 		name: "valid",
 		val:  entity.History{UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1},
 		expectedVal: entity.History{Orders: []entity.Order{
-			{ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: time.Unix(1, 0)},
-			{ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: time.Unix(10, 0)},
+			{ID: 1, ServiceName: "aboba", Status: "approved", Sum: "10", Time: entity.MyTime{Time: time.Unix(10, 0)}},
+			{ID: 2, ServiceName: "aboba", Status: "canceled", Sum: "20", Time: entity.MyTime{Time: time.Unix(10, 0)}},
 		}, UserID: 1, Limit: 10, OrderBy: "date", Desc: true, Page: 1},
 		expectedErr: nil,
 	}, {

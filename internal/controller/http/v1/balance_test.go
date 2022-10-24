@@ -285,12 +285,12 @@ func TestHistory(t *testing.T) {
 			Sum:         "200",
 			ServiceName: "aboba",
 			Status:      "approved",
-			Time:        time.Unix(10, 0),
+			Time:        entity.MyTime{Time: time.Unix(10, 0)},
 		}, {
 			Sum:         "1",
 			ServiceName: "aboba2",
 			Status:      "canceled",
-			Time:        time.Unix(1, 0),
+			Time:        entity.MyTime{Time: time.Unix(10, 0)},
 		},
 		}, Limit: 10, OrderBy: "date", Desc: true, Page: 1}, nil)
 
@@ -318,12 +318,12 @@ func TestHistory(t *testing.T) {
 			Sum:         "200",
 			ServiceName: "aboba",
 			Status:      "approved",
-			Time:        time.Unix(10, 0),
+			Time:        entity.MyTime{Time: time.Unix(10, 0)},
 		}, {
 			Sum:         "1",
 			ServiceName: "aboba2",
 			Status:      "canceled",
-			Time:        time.Unix(1, 0),
+			Time:        entity.MyTime{Time: time.Unix(10, 0)},
 		},
 		}},
 	}, {
