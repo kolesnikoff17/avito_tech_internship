@@ -97,6 +97,8 @@ This is example API requests
 }
 ```
 
+#### Note: Pagination and sort params are optional. If you omit them, you will get whole user's history sorted by date in ascending order. Example:
+
 ### Request:
 ```localhost:8080/v1/history?id=1```
 

@@ -213,8 +213,8 @@ func queryConstructor(history entity.History) string {
 func (r *BalanceRepo) GetReport(ctx context.Context, year, month int) (entity.Report, error) {
 	var Sums []entity.SumByService
 	err := r.Pool.SelectContext(ctx, &Sums,
-		`SELECT sum(o.order_sum) AS sums, s.service_name FROM orders as o
-						JOIN services AS s on s.service_id = o.service_id
+		`SELECT sum(o.order_sum) AS sums, s.service_name FROM orders AS o
+						JOIN services AS s ON s.service_id = o.service_id
 						WHERE o.status_id = 2
 						AND EXTRACT(YEAR FROM o.modified) = $1 AND EXTRACT(MONTH FROM o.modified) = $2
 						GROUP BY s.service_name`, year, month)

@@ -222,7 +222,7 @@ func setHistoryParams(h historyGetRequest) (historyGetRequest, string) {
 	case "date":
 	case "sum":
 	default:
-		return historyGetRequest{}, "Wrong order by param"
+		return historyGetRequest{}, "Wrong \"order by\" value"
 	}
 	return h, ""
 }

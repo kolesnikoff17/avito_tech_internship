@@ -360,7 +360,7 @@ func TestHistory(t *testing.T) {
 		name:    "wrong order by param",
 		query:   "?id=1&order_by=1",
 		expCode: http.StatusBadRequest,
-		resp:    response{Msg: "Wrong order by param"},
+		resp:    response{Msg: "Wrong \"order by\" value"},
 	}, {
 		name:    "no id",
 		query:   "?id=2&order_by=date",

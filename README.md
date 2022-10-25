@@ -1,5 +1,8 @@
 # Balance API
-Test task for Avito internship. [Link to task](https://github.com/avito-tech/internship_backend_2022)
+Test task for Avito internship. [Link to task](https://github.com/avito-tech/internship_backend_2022). 
+Implemented all minimum tasks and bonuses. Also implemented method for canceling existing order.
+When order is canceled, we commit a refund for user's money account. Canceled order doesn't include
+in report and marks in user's operations history as "canceled".
 
 ## Requirements:
 Docker/docker-compose.
@@ -7,8 +10,8 @@ Docker/docker-compose.
 ## Description:
 
 A small REST service. Providing methods to interact with user's money accounts,
-for example crediting and debiting(by creating service order) money, 
-getting user's transaction history, getting "income-per-service" report 
+for example crediting money and debiting(by creating service order) money, 
+getting user's transaction history, getting "income-per-service" report.
 
 ## How to start:
 ```bash
@@ -35,8 +38,9 @@ POST    /order      :   Create, approve or cancel order
 GET     /history    :   Return list of user's operations
 GET     /report     :   Return link for downloading report file
 ```
-For more info see [swagger.yaml](docs/swagger.yaml), [examples](examples.md)
-or open ```localhost:8080/swagger/index.html``` when app is running
+You can find some example requests and responses [here](examples.md).
+
+Also, you can open ```localhost:8080/swagger/index.html``` when app is running. 
 
 
 ## Db schema:
